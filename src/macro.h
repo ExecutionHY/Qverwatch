@@ -50,4 +50,46 @@ using namespace std;
 
 
 
+extern GLFWwindow* window;
+extern int windowWidth;
+extern int windowHeight;
+
+extern GLuint DepthTexture;
+extern GLuint DepthFrameBuffer;
+extern GLuint quad_vertexbuffer;
+
+extern GLuint VertexArrayID;
+extern GLuint QuadProgramID;
+extern GLuint QuadTextureID;
+extern GLuint DepthProgramID;
+extern GLuint DepthMVPMatrixID;
+extern GLuint DepthBiasID;
+extern GLuint ShadowMapID;
+
+extern GLuint programID;
+extern GLuint MVPMatrixID;
+extern GLuint ViewMatrixID;
+extern GLuint ModelMatrixID;
+extern GLuint ModelView3x3MatrixID;
+
+extern GLuint DiffuseTextureID;
+extern GLuint NormalTextureID;
+extern GLuint SpecularTextureID;
+extern GLuint SurfaceID;
+extern GLuint TextureID;
+
+extern GLuint LightID;
+extern GLuint LightInvDirID;
+
+extern GLuint HomePageTexture;
+extern GLuint DiffuseTexture[1000];
+extern GLuint NormalTexture[1000];
+extern GLuint SpecularTexture[1000];
+
+extern OBJ obj[10000];
+extern Object object[10000];
+extern int objIndex, objIndex1, rcdIndex;
+extern ALuint source;
+
+
 #endif /* macro_h */

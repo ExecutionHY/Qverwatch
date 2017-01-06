@@ -14,5 +14,6 @@ extern OBJ obj[10000];
 extern Object object[10000];
 
 bool loadMap(char * filename);
-int loadMdl(const char* path, int objIndex, glm::mat4 model);
+int loadMdl(const char* path, int objIndex);
+int loadMat(const char* path, int objIndex);
 #endif /* MapLoader_hpp */

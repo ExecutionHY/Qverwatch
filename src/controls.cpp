@@ -119,5 +119,6 @@ void computeMatricesFromInputs(){
     
     for (int i = 0; i < rcdIndex; i++) {
         object[i].checkPos(position, 50.0f-2*object[i].range);
+        //object[i].checkPos(position, 100000);
     }
 }

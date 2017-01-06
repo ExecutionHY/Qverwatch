@@ -28,11 +28,12 @@ bool loadMap(char * filename) {
     fscanf(mapfile, "%s %d %d %s %d %d %d\n", str, &t, &t, str, &objectCount, &detailCount, &lightCount);
     
     char MdlName[256];
+    char MatName[256];
     int entityCount, recordCount;
     
     // read detail
     for (int detail = 0; detail < detailCount; detail++) {
-        fscanf(mapfile, "%s %s %s\n", str, MdlName, str);
+        fscanf(mapfile, "%s %s %s\n", str, MdlName, MatName);
         
         vec3 pos, scl, rtt;
         quat rot;
@@ -51,7 +52,7 @@ bool loadMap(char * filename) {
         scale(mat4x4(1.0), scl);
         
         printf("Detail: %d - ", detail);
-        int objIndex2 = loadMdl(MdlName, objIndex, model);
+        int objIndex2 = loadMdl(MdlName, objIndex);
         for (int i = objIndex; i < objIndex2; i++) {
             object[i] = Object(MdlName, i, 0);
             object[i].setModel(model);
@@ -65,12 +66,12 @@ bool loadMap(char * filename) {
          fscanf(mapfile, "%s %s %d\n", str, MdlName, &entityCount);
          mat4x4 model = mat4x4(1.0);
          printf("objects: %d - ", objct);
-         int objIndex2 = loadMdl(MdlName, objIndex1, model);
+         int objIndex2 = loadMdl(MdlName, objIndex1);
          int meshCount = objIndex2 - objIndex1;
          
          // read entity
          for (int entity = 0; entity < entityCount; entity++) {
-             fscanf(mapfile, "%s %s %d\n", str, str, &recordCount);
+             fscanf(mapfile, "%s %s %d\n", str, MatName, &recordCount);
              for (int record = 0; record < recordCount; record++) {
                  fscanf(mapfile, "%s\n", str);
                  
@@ -103,11 +104,11 @@ bool loadMap(char * filename) {
      }
     
     
-    printf("loadMAP complete.");
+    printf("loadMAP complete.\n");
     return true;
 }
 
-int loadMdl( const char * path, int objIndex, mat4x4 model ) {
+int loadMdl( const char * path, int objIndex ) {
     
     char fullpath[256] = "";
     sprintf(fullpath,"%s%sx","res/Decode/",path);
@@ -204,4 +205,35 @@ int loadMdl( const char * path, int objIndex, mat4x4 model ) {
     }
     
     return objIndex+meshCount;
+}
+
+int loadMat(const char* path, int objIndex) {
+    char fullpath[256] = "";
+    sprintf(fullpath,"%s%sx","res/Decode/",path);
+    FILE * file = fopen(fullpath, "r");
+    if( file == NULL ){
+        printf("Impossible to open the file %s!\n", path);
+        return objIndex;
+    }
+    int t, materialCount, textureCount, textureType;
+    
+    // OWMATHeader -> materialCount
+    fscanf(file, "%d %d %d\n", &t, &t, &materialCount);
+    
+    char ddsFile[256], str[256];
+    for (int mtl = 0; mtl < materialCount; mtl++) {
+        fscanf(file, "%s %d\n", str, &textureCount);
+        for (int t = 0; t < textureCount; t++) {
+            fscanf(file, "%s %d\n", ddsFile, &textureType);
+            char ddsPath[256] = "";
+            sprintf(ddsPath, "%s%s", "res/dds/", ddsFile);
+            if (textureType == 0) {
+                DiffuseTexture[objIndex+mtl] = loadDDS(ddsPath);
+            }
+            else if (textureType == 1) {
+                NormalTexture[objIndex+mtl] = loadDDS(ddsPath);
+            }
+        }
+    }
+    return 1;
 }

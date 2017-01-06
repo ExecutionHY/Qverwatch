@@ -165,7 +165,8 @@ void initGL() {
     TextureID = glGetUniformLocation(QuadProgramID, "myTextureSampler");
     
     // Create and compile our GLSL program from the shaders
-    programID = LoadShaders( "ShadowMapping.vertexshader", "ShadowMapping.fragmentshader" );
+    //programID = LoadShaders( "ShadowMapping.vertexshader", "ShadowMapping.fragmentshader" );
+    programID = LoadShaders( "MainAdvanced.vertexshader", "MainAdvanced.fragmentshader" );
     
     // Get a handle for our "myTextureSampler" uniform
     DiffuseTextureID  = glGetUniformLocation(programID, "DiffuseTextureSampler");

@@ -8,46 +8,6 @@
 
 #include "macro.h"
 
-extern GLFWwindow* window;
-extern int windowWidth;
-extern int windowHeight;
-
-extern GLuint DepthTexture;
-extern GLuint DepthFrameBuffer;
-extern GLuint quad_vertexbuffer;
-
-extern GLuint VertexArrayID;
-extern GLuint QuadProgramID;
-extern GLuint QuadTextureID;
-extern GLuint DepthProgramID;
-extern GLuint DepthMVPMatrixID;
-extern GLuint DepthBiasID;
-extern GLuint ShadowMapID;
-
-extern GLuint programID;
-extern GLuint MVPMatrixID;
-extern GLuint ViewMatrixID;
-extern GLuint ModelMatrixID;
-extern GLuint ModelView3x3MatrixID;
-
-extern GLuint DiffuseTextureID;
-extern GLuint NormalTextureID;
-extern GLuint SpecularTextureID;
-extern GLuint SurfaceID;
-extern GLuint TextureID;
-
-extern GLuint LightID;
-extern GLuint LightInvDirID;
-
-extern GLuint HomePageTexture;
-extern GLuint DiffuseTexture[1000];
-extern GLuint NormalTexture[1000];
-extern GLuint SpecularTexture[1000];
-
-extern OBJ obj[10000];
-extern Object object[10000];
-extern int objIndex, objIndex1, rcdIndex;
-extern ALuint source;
 
 mat4 ProjectionMatrix;
 mat4 ViewMatrix;
@@ -80,12 +40,18 @@ int main( void )
     // ***************************** resource loading *******************************
     
     //Texture[0] = loadBMP_custom("res/wall.bmp");
-    DiffuseTexture[0] = loadDDS("res/diffuse.DDS");
+    DiffuseTexture[0] = loadBMP_custom("res/wall.bmp");
+    //DiffuseTexture[0] = loadDDS("res/diffuse.DDS");
     NormalTexture[0] = loadBMP_custom("res/normal.bmp");
     SpecularTexture[0] = loadDDS("res/specular.DDS");
  
     loadMap("res/Decode/HANAMURA.owmapx");
     //loadMap("res/car.owmapx");
+    //obj[9999].initOBJ("res/test.obj");
+    //Object test = Object("test", 9999, 0);
+    
+    printf("begin\n");
+    
     
     //initAL("res/Hanamura.wav");
     
@@ -114,13 +80,15 @@ int main( void )
         // Use our shader
         glUseProgram(DepthProgramID);
         
-        vec3 lightInvDir = vec3(30, 30, -30);
+        vec3 lightInvDir = vec3(10, 10, 10);
         
         // Compute the MVP from the light's point of view
         DepthProjectionMatrix = ortho<float>(-100, 100, -100, 100, -100, 200);
         DepthViewMatrix = lookAt(lightInvDir, vec3(0, 0, 0), vec3(0, 1, 0));
         
-        //wall.loadDepth();
+        //test.loadDepth();
+        
+        
         for (int i = 0; i < objIndex; i++) {
             if (object[i].isValid()) object[i].loadDepth();
         }
@@ -149,7 +117,9 @@ int main( void )
         // spot light
         //glUniform3f(LightID, lightpos.x, lightpos.y, lightpos.z);
         
-        //wall.drawObject();
+        //test.drawObject();
+        
+        
         for (int i = 0; i < objIndex; i++) {
             if (object[i].isValid()) object[i].drawObject();
         }
@@ -171,7 +141,6 @@ int main( void )
             fps = nbFrames;
             nbFrames = 0;
             lastTime += 1.0;
-            printf("fps = %d\n", fps);
         }
         
         char text[256];
