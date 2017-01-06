@@ -43,6 +43,7 @@ using namespace std;
 #include "text2D.hpp"
 #include "ObjectManager.hpp"
 #include "MapLoader.hpp"
+#include "AudioManager.hpp"
 
 #define max(a, b)  (((a) > (b)) ? (a) : (b))
 

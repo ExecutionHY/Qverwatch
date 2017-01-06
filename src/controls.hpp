@@ -10,7 +10,7 @@
 #define controls_hpp
 
 #include "macro.h"
-
+#include "ObjectManager.hpp"
 extern int windowWidth;
 extern int windowHeight;
 extern int rcdIndex;
