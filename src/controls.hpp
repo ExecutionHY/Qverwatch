@@ -11,6 +11,11 @@
 
 #include "macro.h"
 
+extern int windowWidth;
+extern int windowHeight;
+extern int rcdIndex;
+extern Object object[10000];
+
 void computeMatricesFromInputs();
 glm::mat4 getViewMatrix();
 glm::mat4 getProjectionMatrix();

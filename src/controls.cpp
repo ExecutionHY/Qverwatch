@@ -30,10 +30,6 @@ float mouseSpeed = 0.005f;
 extern ALuint source;
 bool play = true;
 bool spaceReleased = false;
-extern int windowWidth;
-extern int windowHeight;
-extern int rcdIndex;
-extern Object object[10000];
 
 void computeMatricesFromInputs(){
 
