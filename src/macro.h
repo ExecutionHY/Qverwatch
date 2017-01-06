@@ -44,10 +44,10 @@ using namespace std;
 #include "ObjectManager.hpp"
 #include "MapLoader.hpp"
 #include "AudioManager.hpp"
+#include "PageManager.hpp"
 
 #define max(a, b)  (((a) > (b)) ? (a) : (b))
 
-#define DEPTH_TEXTURE_SIZE 1024
-#define FRUSTUM_DEPTH 1.0f
+
 
 #endif /* macro_h */
