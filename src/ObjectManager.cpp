@@ -48,14 +48,19 @@ void OBJ::initOBJ(char* name) {
         vector<vec3> verticles;
         vector<vec2> uvs;
         vector<vec3> normals;
+        vector<vec3> tangents;
+        vector<vec3> bitangents;
         loadOBJ(name, verticles, uvs, normals);
+        computeTangentBasis(verticles, uvs, normals, tangents, bitangents);
         
         //  Load it into a VBO
-        indexVBO(verticles, uvs, normals, indices, indexed_vertices, indexed_uvs, indexed_normals);
+        indexVBO_TBN(verticles, uvs, normals, tangents, bitangents, indices, indexed_vertices, indexed_uvs, indexed_normals, indexed_tangents, indexed_bitangents);
         // release vectors
         verticles.clear();
         uvs.clear();
         normals.clear();
+        tangents.clear();
+        bitangents.clear();
         
         initBuffer();
     }
@@ -119,9 +124,10 @@ Object::Object() {
     this->name = "";
 }
 
-Object::Object(string name, int ObjNum, int TextureNum, int surface) {
+Object::Object(string name, int ObjNum, int DiffuseTextureNum, int NormalTextureNum, int surface) {
     this->ObjNum = ObjNum;
-    this->TextureNum = TextureNum;
+    this->DiffuseTextureNum = DiffuseTextureNum;
+    this->NormalTextureNum = NormalTextureNum;
     this->name = name;
     this->ModelMatrix = mat4(1.0);
     this->surface = surface;
@@ -165,27 +171,27 @@ void Object::drawObject() {
     
     // Bind our diffuse texture in Texture Unit 0
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, DiffuseTexture[this->TextureNum]);
+    glBindTexture(GL_TEXTURE_2D, DiffuseTexture[this->DiffuseTextureNum]);
     // Set our "DiffuseTextureSampler" sampler to user Texture Unit 0
     glUniform1i(DiffuseTextureID, 0);
     glUniform1i(SurfaceID, this->surface);
 
     // Bind our normal texture in Texture Unit 1
     glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, NormalTexture[this->TextureNum]);
+    glBindTexture(GL_TEXTURE_2D, NormalTexture[this->NormalTextureNum]);
     // Set our "NormalTextureSampler" sampler to user Texture Unit 1
     glUniform1i(NormalTextureID, 1);
     
     // Bind our normal texture in Texture Unit 2
     glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, SpecularTexture[this->TextureNum]);
+    glBindTexture(GL_TEXTURE_2D, SpecularTexture[0]);
     // Set our "SpecularTextureSampler" sampler to user Texture Unit 2
     glUniform1i(SpecularTextureID, 2);
     
     
-    glActiveTexture(GL_TEXTURE31);
+    glActiveTexture(GL_TEXTURE3);
     glBindTexture(GL_TEXTURE_2D, DepthTexture);
-    glUniform1i(ShadowMapID, 31);
+    glUniform1i(ShadowMapID, 3);
     
     obj[this->ObjNum].bindBuffer();
     // Draw the triangles !

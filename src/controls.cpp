@@ -16,9 +16,10 @@ glm::mat4 getProjectionMatrix(){
 
 
 // Initial position : on +Z
-glm::vec3 position = glm::vec3( 0, 10, 0 );
+//glm::vec3 position = glm::vec3( -12, 2, -85 );
+glm::vec3 position = glm::vec3( 0, 2, 0 );
 // Initial horizontal angle : toward -Z
-float horizontalAngle = 3.14f;
+float horizontalAngle = 3.14f*1.25;
 // Initial vertical angle : none
 float verticalAngle = 0.0f;
 // Initial Field of View
@@ -98,6 +99,7 @@ void computeMatricesFromInputs(){
                 play = true;
             }
             spaceReleased = false;
+            printf("%f, %f, %f\n", position.x, position.y, position.z);
         }
     }
     
@@ -105,7 +107,7 @@ void computeMatricesFromInputs(){
 
 	float FoV = initialFoV;// - 5 * glfwGetMouseWheel(); // Now GLFW 3 requires setting up a callback for this. It's a bit too complicated for this beginner's tutorial, so it's disabled instead.
 
-	// Projection matrix : 45° Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
+	// Projection matrix : 45âˆž Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
 	Projection = glm::perspective(FoV, float(windowWidth / windowHeight), 0.1f, 10000.0f);
 	// Camera matrix
 	View       = glm::lookAt(
@@ -118,7 +120,7 @@ void computeMatricesFromInputs(){
 	lastTime = currentTime;
     
     for (int i = 0; i < rcdIndex; i++) {
-        object[i].checkPos(position, 50.0f-2*object[i].range);
-        //object[i].checkPos(position, 100000);
+        //object[i].checkPos(position, 50.0f-2*object[i].range);
+        object[i].checkPos(position, 1000);
     }
 }

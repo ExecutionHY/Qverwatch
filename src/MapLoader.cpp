@@ -9,6 +9,8 @@
 #include "MapLoader.hpp"
 
 int objIndex = 0, objIndex1 = 0, rcdIndex = 0;
+vector<int> diffuseT;
+vector<int> normalT;
 
 using namespace glm;
 bool loadMap(char * filename) {
@@ -41,6 +43,8 @@ bool loadMap(char * filename) {
         fscanf(mapfile, "[%f, %f, %f]\n", &scl.x, &scl.y, &scl.z);
         fscanf(mapfile, "[%f, %f, %f, %f]\n", &rot.x, &rot.y, &rot.z, &rot.w);
         
+        if (distance(pos, position) > 50.0f) continue;
+        
         float agl = acosf(rot.w)*2;
         rtt.x = rot.x / sin(agl/2);
         rtt.y = rot.y / sin(agl/2);
@@ -54,13 +58,14 @@ bool loadMap(char * filename) {
         printf("Detail: %d - ", detail);
         int objIndex2 = loadMdl(MdlName, objIndex);
         for (int i = objIndex; i < objIndex2; i++) {
-            object[i] = Object(MdlName, i, 0);
+            object[i] = Object(MdlName, i, 0, 0);
             object[i].setModel(model);
         }
         objIndex = objIndex2;
     }
     objIndex1 = objIndex;
     rcdIndex = objIndex;
+    int mtlIndex = 1;
     // read object
      for (int objct = 0; objct < objectCount; objct++) {
          fscanf(mapfile, "%s %s %d\n", str, MdlName, &entityCount);
@@ -70,9 +75,11 @@ bool loadMap(char * filename) {
          int meshCount = objIndex2 - objIndex1;
          
          // read entity
+         int rcdcnt = 0;
          for (int entity = 0; entity < entityCount; entity++) {
              fscanf(mapfile, "%s %s %d\n", str, MatName, &recordCount);
              for (int record = 0; record < recordCount; record++) {
+                 rcdcnt++;
                  fscanf(mapfile, "%s\n", str);
                  
                  vec3 pos, scl, rtt;
@@ -80,6 +87,9 @@ bool loadMap(char * filename) {
                  fscanf(mapfile, "[%f, %f, %f]\n", &pos.x, &pos.y, &pos.z);
                  fscanf(mapfile, "[%f, %f, %f]\n", &scl.x, &scl.y, &scl.z);
                  fscanf(mapfile, "[%f, %f, %f, %f]\n", &rot.x, &rot.y, &rot.z, &rot.w);
+                 
+                 if (distance(pos, position) > 50.0f) continue;
+                 
                  float agl = acosf(rot.w)*2;
                  rtt.x = rot.x / sin(agl/2);
                  rtt.y = rot.y / sin(agl/2);
@@ -91,14 +101,17 @@ bool loadMap(char * filename) {
                  scale(mat4x4(1.0), scl);
                  
                  // add (meshCount) records into object[]
+                 loadMat(MatName, mtlIndex);
+                 if (shouldDelete(MatName, rcdcnt)) model = mat4x4(0);
                  for (int i = 0; i < meshCount; i++) {
-                     object[i+rcdIndex] = Object(MdlName, i+objIndex1, 0);
+                     object[i+rcdIndex] = Object(MdlName, i+objIndex1, diffuseT[i], normalT[i]);
                      object[i+rcdIndex].setModel(model);
                      object[i+rcdIndex].setPos(pos);
                      object[i+rcdIndex].setRange(max(max(scl.x, scl.y), scl.z));
                  }
                  rcdIndex += meshCount;
              }
+             mtlIndex += meshCount;
          }
          objIndex1 = objIndex2;
      }
@@ -146,6 +159,7 @@ int loadMdl( const char * path, int objIndex ) {
                 fscanf(file, "[%f, %f] ", &uv.x, &uv.y );
                 if (j < uvCount-1) fscanf(file, ", ");
             }
+            uv.y = 1 - uv.y;
             obj[idx].indexed_uvs.push_back(uv);
             fscanf(file, "]\n");
             
@@ -207,7 +221,7 @@ int loadMdl( const char * path, int objIndex ) {
     return objIndex+meshCount;
 }
 
-int loadMat(const char* path, int objIndex) {
+int loadMat(const char* path, int mtlIndex) {
     char fullpath[256] = "";
     sprintf(fullpath,"%s%sx","res/Decode/",path);
     FILE * file = fopen(fullpath, "r");
@@ -215,25 +229,41 @@ int loadMat(const char* path, int objIndex) {
         printf("Impossible to open the file %s!\n", path);
         return objIndex;
     }
-    int t, materialCount, textureCount, textureType;
+    int flag = 0, t, materialCount, textureCount, textureType;
     
     // OWMATHeader -> materialCount
-    fscanf(file, "%d %d %d\n", &t, &t, &materialCount);
+    fscanf(file, "%d %d %d\n", &flag, &t, &materialCount);
     
+    diffuseT.clear();
+    normalT.clear();
     char ddsFile[256], str[256];
     for (int mtl = 0; mtl < materialCount; mtl++) {
         fscanf(file, "%s %d\n", str, &textureCount);
+        int diffuseIndex = 0, normalIndex = 0;
         for (int t = 0; t < textureCount; t++) {
             fscanf(file, "%s %d\n", ddsFile, &textureType);
-            char ddsPath[256] = "";
-            sprintf(ddsPath, "%s%s", "res/dds/", ddsFile);
-            if (textureType == 0) {
-                DiffuseTexture[objIndex+mtl] = loadDDS(ddsPath);
+            char bmpPath[256] = "";
+            sprintf(bmpPath, "%s%s", "res/bmp/", ddsFile);
+            int length = strlen(bmpPath);
+            bmpPath[length-3] = 'b';
+            bmpPath[length-2] = 'm';
+            bmpPath[length-1] = 'p';
+            if (textureType == 0 && diffuseIndex == 0) {
+                DiffuseTexture[mtlIndex+mtl] = loadBMP_custom(bmpPath);
+                diffuseIndex = mtlIndex+mtl;
             }
-            else if (textureType == 1) {
-                NormalTexture[objIndex+mtl] = loadDDS(ddsPath);
+            else if (textureType == 1 && normalIndex == 0) {
+                NormalTexture[mtlIndex+mtl] = loadBMP_custom(bmpPath);
+                normalIndex = mtlIndex+mtl;
             }
         }
+        diffuseT.push_back(diffuseIndex);
+        normalT.push_back(normalIndex);
     }
     return 1;
+}
+
+bool shouldDelete(const char* entity, const int rcd) {
+    if (strcmp(entity, "00000000078C_0000000010D2.owmat") == 0) return true;
+    return false;
 }

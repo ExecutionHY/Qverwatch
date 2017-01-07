@@ -12,8 +12,10 @@
 #include "macro.h"
 extern OBJ obj[10000];
 extern Object object[10000];
+extern vec3 position;
 
 bool loadMap(char * filename);
 int loadMdl(const char* path, int objIndex);
-int loadMat(const char* path, int objIndex);
+int loadMat(const char* path, int mtlIndex);
+bool shouldDelete(const char* entity, const int rcd);
 #endif /* MapLoader_hpp */

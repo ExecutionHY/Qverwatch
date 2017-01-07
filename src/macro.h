@@ -45,6 +45,7 @@ using namespace std;
 #include "MapLoader.hpp"
 #include "AudioManager.hpp"
 #include "PageManager.hpp"
+#include "tangentspace.hpp"
 
 #define max(a, b)  (((a) > (b)) ? (a) : (b))
 

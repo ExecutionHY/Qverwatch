@@ -30,6 +30,7 @@
 
 #include "objloader.hpp"
 #include "vboindexer.hpp"
+#include "tangentspace.hpp"
 
 using namespace std;
 using namespace glm;
@@ -108,14 +109,15 @@ private:
     bool movable;            // whether the model movable
     int surface;          // light on all faces
     int ObjNum;             // the num in Objs
-    int TextureNum;         // the num in textures
+    int DiffuseTextureNum;         // the num in textures
+    int NormalTextureNum;
     vec3 pos;
     bool valid;
 public:
     float range;
 public:
     Object();
-    Object(string name, int ObjNum, int TextureNum, int surface = 0);
+    Object(string name, int ObjNum, int DiffuseTextureNum, int NormalTextureNum, int surface = 0);
     //Object(string name, int ObjNum, int TextureNum, int surface);
     void drawObject();
     void loadDepth();

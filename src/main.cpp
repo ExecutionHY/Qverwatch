@@ -41,17 +41,17 @@ int main( void )
     
     //Texture[0] = loadBMP_custom("res/wall.bmp");
     DiffuseTexture[0] = loadBMP_custom("res/wall.bmp");
+    //GLuint test = loadBMP_custom("res/bmp/000000001080.bmp");
     //DiffuseTexture[0] = loadDDS("res/diffuse.DDS");
-    NormalTexture[0] = loadBMP_custom("res/normal.bmp");
+    NormalTexture[0] = loadBMP_custom("res/bmp/000000001B16.bmp");
     SpecularTexture[0] = loadDDS("res/specular.DDS");
  
-    loadMap("res/Decode/HANAMURA.owmapx");
-    //loadMap("res/car.owmapx");
-    //obj[9999].initOBJ("res/test.obj");
-    //Object test = Object("test", 9999, 0);
-    
-    printf("begin\n");
-    
+    //loadMap("res/Decode/HANAMURA.owmapx");
+    //loadMap("res/Decode/simple.owmapx");
+    loadMap("res/car.owmapx");
+    obj[9999].initOBJ("res/test.obj");
+    Object test = Object("test", 9999, 0, 0);
+    //test.setModel(scale(mat4x4(1.0), vec3(10,10,10)));
     
     //initAL("res/Hanamura.wav");
     
@@ -79,21 +79,32 @@ int main( void )
         
         // Use our shader
         glUseProgram(DepthProgramID);
+        /*
+        //vec3 lightInvDir = vec3(10, 10, 10);
+        vec3 lightPos = vec3(-11, 11, -84);
+        vec3 lightInvDir = vec3(-15.929764, 18.679287, -88.606285) - vec3(-7.360991, 3.405631, -81.104904);
+        */
         
-        vec3 lightInvDir = vec3(10, 10, 10);
+        //vec3 lightPos = vec3( -12, 8, -85 );
+        vec3 lightPos = vec3( 10, 10, 10 );
+        vec3 lightInvDir = lightPos;
+        
+        //DepthProjectionMatrix = perspective(45.0f, 1.0f/1.0f, 0.1f, 1000.0f);
+        //DepthViewMatrix = lookAt(lightInvDir, vec3(-12, 0, -85), vec3(0, 1, 0));
+        
         
         // Compute the MVP from the light's point of view
         DepthProjectionMatrix = ortho<float>(-100, 100, -100, 100, -100, 200);
         DepthViewMatrix = lookAt(lightInvDir, vec3(0, 0, 0), vec3(0, 1, 0));
         
-        //test.loadDepth();
+        test.loadDepth();
         
         
         for (int i = 0; i < objIndex; i++) {
-            if (object[i].isValid()) object[i].loadDepth();
+            object[i].loadDepth();
         }
         for (int i = objIndex; i < rcdIndex; i++) {
-            if (object[i].isValid()) object[i].loadDepth();
+            object[i].loadDepth();
         }
         
         // *************************** Draw Objects ****************************
@@ -115,9 +126,9 @@ int main( void )
         
         glUniform3f(LightInvDirID, lightInvDir.x, lightInvDir.y, lightInvDir.z);
         // spot light
-        //glUniform3f(LightID, lightpos.x, lightpos.y, lightpos.z);
+        //glUniform3f(LightID, lightPos.x, lightPos.y, lightPos.z);
         
-        //test.drawObject();
+        test.drawObject();
         
         
         for (int i = 0; i < objIndex; i++) {
@@ -155,6 +166,42 @@ int main( void )
         printText2D(text4, 390, 310, 20);
         
         
+        // ********************** Debug *************************
+        
+        // Render to the screen
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        
+        glViewport(0,0,windowWidth/2,windowHeight/2);
+        
+        // Use our shader
+        glUseProgram(QuadProgramID);
+        
+        // Bind our texture in Texture Unit 0
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, DepthTexture);
+        // Set our "renderedTexture" sampler to user Texture Unit 0
+        glUniform1i(TextureID, 0);
+        
+        // 1rst attribute buffer : vertices
+        glEnableVertexAttribArray(0);
+        glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
+        glVertexAttribPointer(
+                              0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+                              3,                  // size
+                              GL_FLOAT,           // type
+                              GL_FALSE,           // normalized?
+                              0,                  // stride
+                              (void*)0            // array buffer offset
+                              );
+        
+        // Draw the triangle !
+        // You have to disable GL_COMPARE_R_TO_TEXTURE above in order to see anything !
+        glDrawArrays(GL_TRIANGLES, 0, 6); // 2*3 indices starting at 0 -> 2 triangles
+        glDisableVertexAttribArray(0);
+        
+        
+        
+        
         // Swap buffers
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -168,6 +215,8 @@ int main( void )
     } // Check if the ESC key was pressed or the window was closed
     while( glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
           glfwWindowShouldClose(window) == 0 );
+    
+    
     // Cleanup VBO and shader
     
     glDeleteProgram(programID);
@@ -183,7 +232,7 @@ int main( void )
     glDeleteTextures(1, &HomePageTexture);
     
     
-    deleteAL();
+    //deleteAL();
     
     
     // Close OpenGL window and terminate GLFW
