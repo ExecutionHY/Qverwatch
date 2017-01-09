@@ -92,7 +92,7 @@ bool loadMap(char * filename) {
                  fscanf(mapfile, "[%f, %f, %f]\n", &scl.x, &scl.y, &scl.z);
                  fscanf(mapfile, "[%f, %f, %f, %f]\n", &rot.x, &rot.y, &rot.z, &rot.w);
                  
-                 //if (distance(pos, position) > 50.0f) continue;
+                 if (distance(pos, position) > 50.0f) continue;
                  
                  float agl = acosf(rot.w)*2;
                  rtt.x = rot.x / sin(agl/2);
@@ -108,7 +108,7 @@ bool loadMap(char * filename) {
                  loadMat(MatName, mtlIndex);
                  if (shouldDelete(MatName, rcdcnt)) model = mat4x4(0);
                  for (int i = 0; i < meshCount; i++) {
-                     object[i+rcdIndex] = Object(MdlName, i+objIndex1, diffuseT[i], 0);
+                     object[i+rcdIndex] = Object(MdlName, i+objIndex1, diffuseT[i], normalT[i]);
                      object[i+rcdIndex].setModel(model);
                      object[i+rcdIndex].setPos(pos);
                      object[i+rcdIndex].setRange(max(max(scl.x, scl.y), scl.z));
@@ -156,6 +156,7 @@ int loadMdl( const char * path, int objIndex ) {
             glm::vec3 normal;
             fscanf(file, "[%f, %f, %f] [", &normal.x, &normal.y, &normal.z );
             normal = -normal;
+            if (shouldReverseNormal(path)) normal = -normal;
             obj[idx].indexed_normals.push_back(normal);
             // I don't know why there is two uvs in a vertex, but we choose the 2nd cauz it's < 1
             glm::vec2 uv;
@@ -262,7 +263,7 @@ int loadMat(const char* path, int mtlIndex) {
                     diffuseTextureCount++;
                 }
             }
-            else if (textureType == 1 && normalIndex == 0) {
+            else if (textureType == 1 && normalIndex == 0 && flag == -1) {
                 normalIndex = findNormalTexture(bmpPath);
                 if (normalIndex == 0) {
                     NormalTexture[normalTextureCount] = loadBMP_custom(bmpPath);
@@ -296,4 +297,10 @@ int findNormalTexture(const char* path) {
             return i;
     }
     return 0;
+}
+
+bool shouldReverseNormal(const char* mdl) {
+    if (strcmp(mdl, "000000000E26.owmdl") == 0) return true;
+    if (strcmp(mdl, "000000000DC0.owmdl") == 0) return true;
+    return false;
 }

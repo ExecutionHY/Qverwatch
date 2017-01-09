@@ -26,6 +26,9 @@ uniform mat3 MV3x3;
 uniform vec3 LightInvDirection_worldspace;
 uniform mat4 DepthBiasMVP;
 
+// PCSS
+uniform mat4 DepthMVP;
+out vec3 Normal_lightspace;
 
 void main(){
     
@@ -33,6 +36,7 @@ void main(){
     gl_Position =  MVP * vec4(vertexPosition_modelspace,1);
     
     ShadowCoord = DepthBiasMVP * vec4(vertexPosition_modelspace,1);
+
     
     // Position of the vertex, in worldspace : M * position
     Position_worldspace = (M * vec4(vertexPosition_modelspace,1)).xyz;
@@ -64,5 +68,8 @@ void main(){
     
     LightDirection_tangentspace = TBN * LightDirection_cameraspace;
     EyeDirection_tangentspace =  TBN * EyeDirection_cameraspace;
+    
+    // PCSS
+    Normal_lightspace = (DepthMVP * vec4(vertexNormal_modelspace,0)).xyz;
 }
 

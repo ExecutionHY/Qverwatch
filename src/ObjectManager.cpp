@@ -161,6 +161,9 @@ void Object::drawObject() {
     glUniformMatrix4fv(DepthBiasID, 1, GL_FALSE, &DepthBiasMVP[0][0]);
     glUniformMatrix3fv(ModelView3x3MatrixID, 1, GL_FALSE, &ModelView3x3Matrix[0][0]);
     
+    // for PCSS
+    glUniformMatrix4fv(DepthMVPID, 1, GL_FALSE, &DepthMVP[0][0]);
+    
     /*
     // Bind our texture in Texture Unit 0
     glActiveTexture(GL_TEXTURE0);

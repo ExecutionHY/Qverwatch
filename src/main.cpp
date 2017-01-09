@@ -82,22 +82,44 @@ int main( void )
      vec3 lightPos = vec3(-11, 11, -84);
      vec3 lightInvDir = vec3(-15.929764, 18.679287, -88.606285) - vec3(-7.360991, 3.405631, -81.104904);
      */
-    
+    /*
     //vec3 lightPos = vec3( -12, 15, -85 );
-    //vec3 nearLightPos = vec3( -55.915115, 10.807584, -36.536823 );
-    //vec3 basePos = vec3( -8.680655, 0.710400, -88.737778 );
+    vec3 nearLightPos = vec3( -55.915115, 10.807584, -36.536823 );
+    vec3 basePos = vec3( -8.680655, 0.710400, -88.737778 );
+    vec3 lightInvDir = nearLightPos - basePos;
+    vec3 lightPos = basePos + lightInvDir * 1000.0f;
+    DepthProjectionMatrix = ortho<float>(-4, 4, -4, 4, 20, 400);
+    DepthViewMatrix = lookAt(nearLightPos, basePos, vec3(0, 1, 0));
+    */
+    
+    /*
+    // right back up light
     vec3 nearLightPos = vec3(13.802021, 13.373522, -87.761742);
     vec3 basePos = vec3(-13.333028, 3.317286, -84.592285);
     vec3 lightInvDir = nearLightPos - basePos;
     vec3 lightPos = basePos + lightInvDir * 1000.0f;
     lightPos = basePos + lightInvDir * 10.0f;
-    
-    
     DepthProjectionMatrix = perspective(90.0f, 1.0f/1.0f, 20.0f, 100.0f);
     DepthViewMatrix = lookAt(nearLightPos, basePos, vec3(0, 1, 0));
+    */
+    
+    
+    // sword spot
+    
+    vec3 nearLightPos = vec3(-15.086610, 1.191215, -90.229813);
+    vec3 basePos = vec3(-17.558996, 0.074182, -91.201866);
+    vec3 lightInvDir = nearLightPos - basePos;
+    vec3 lightPos = basePos + lightInvDir * 4.0f;
+    DepthProjectionMatrix = ortho<float>(-1, 1, -1, 1, 2, 20);
+    DepthViewMatrix = lookAt(nearLightPos, basePos, vec3(0, 1, 0));
+    
+    
+    
+    
+    
     
     // Compute the MVP from the light's point of view
-    //DepthProjectionMatrix = ortho<float>(-16, 16, -16, 16, 10, 50);
+    //DepthProjectionMatrix = perspective(20.0f, 1.0f/1.0f, 2.0f, 20.0f);
     //DepthViewMatrix = lookAt(lightInvDir, vec3(0, 0, 0), vec3(0, 1, 0));
     
     //test.loadDepth();

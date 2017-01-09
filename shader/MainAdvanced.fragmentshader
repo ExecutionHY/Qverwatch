@@ -51,12 +51,127 @@ float random(vec3 seed, int i){
     return fract(sin(dot_product) * 43758.5453);
 }
 
+// ******************** PCSS *************************
+
+in vec3 Normal_lightspace;
+uniform float ZNear;
+uniform float ZFar;
+
+int GetBlockedNum(sampler2D sm, vec4 pos_lightspace, float bias, int detectTimes,float subPixWidth, vec2 dz_duv)
+{
+    int BlockedNum = 0;
+    
+    for(int i = -detectTimes; i <= detectTimes;i += 1)
+        for(int j = -detectTimes;j <= detectTimes;j += 1)
+        {
+            vec2 deviation =  vec2(i,j) * subPixWidth;
+            float devi_z = dot(deviation,dz_duv);
+            BlockedNum += texture( sm, pos_lightspace.xy + deviation).x < (pos_lightspace.z + bias  + devi_z) ? 1 : 0;
+            if(subPixWidth <= 0.0001 && BlockedNum > 0)
+                return BlockedNum;
+        }
+    return BlockedNum;
+}
+bool isBlocked(float blockerDep, float recDep)
+{
+    if(blockerDep >= recDep - 0.01)
+        return false;
+    else 
+        return true;
+}
+float ZClipToZCmra(float zClip)
+{
+    //return ZNear + zClip * (ZFar - ZNear);
+    return ZFar*ZNear / (ZFar - zClip*(ZFar-ZNear));
+    //	return zClip * 3.4f;
+}
+float AveBlockerZ(sampler2D sm, vec4 pos_lightspace, int detectTimes,float radius, vec2 dz_duv)
+{
+    float depthSum = 0.0f;
+    int blocknum = 0;
+    for(int i = 0;i<detectTimes;i++)
+    {
+        vec2 deviation =  poissonDisk[int(16*random(Position_worldspace.xyz,i))%16] * radius;
+        float dz = dot(dz_duv,deviation);
+        float temp =  texture( sm, pos_lightspace.xy + deviation).x;
+        if(isBlocked(temp,pos_lightspace.z + dz))
+        {
+            depthSum += temp;
+            blocknum ++;
+        }
+    }
+    return depthSum/blocknum;
+}
+float GetVisibility(sampler2D sm, vec4 pos_lightspace, float bias, vec2 dz_duv, float penumWidth)
+{
+    float resVisibility = 0.0f;
+    float poissonRadiu = penumWidth;
+    int poissonTimes = 16;
+    float perVisibility = (1.0/ poissonTimes );
+    
+    for(int k = 0;k < poissonTimes;k++)
+    {
+        vec2 deviation =  poissonDisk[(k * 17)%16] * poissonRadiu;
+        float dz = dot(dz_duv,deviation);
+        resVisibility += texture( sm, pos_lightspace.xy + deviation).x > (pos_lightspace.z - bias)? 1.0 : 0.0;
+    }
+    return   perVisibility *  resVisibility;
+}
+vec2 getDz_Duv(vec3 normal_lightspace)
+{
+    return vec2(-normal_lightspace.x / normal_lightspace.z , -normal_lightspace.y / normal_lightspace.z);
+}
+bool mayCastShad(vec4 posLightSpace)
+{
+    if(posLightSpace.x <= 0.01 || posLightSpace.x >= 0.99 ||
+       posLightSpace.y <= 0.01 || posLightSpace.y >= 0.99 ||
+       posLightSpace.z <= 0.01 || posLightSpace.z >= 0.99)
+        return false;
+    else
+        return true;
+}
+
+float PCSS(sampler2D shadowMap,vec4 ShadowCoord, float cosTheta,vec3 Normal_lightspace)
+{
+    float resVisibility;
+    if(!mayCastShad(ShadowCoord))
+    {
+        resVisibility = 1.0f;
+    }
+    else{
+        //float bias = -clamp(0.0005 * tan(acos(cosTheta)), 0,0.005);
+        int detectTimes = 2;
+        vec2 dz_duv = getDz_Duv(Normal_lightspace);
+        float bias = 0;//dz_duv = vec2(0,0);
+        
+        //float penumbra = LightSize * ((posCmra.z) -  aveBlckZCmra) / aveBlckZCmra;
+        int nblock = GetBlockedNum(shadowMap, ShadowCoord, bias, detectTimes, 0.05, dz_duv);
+        
+        if (nblock == 0)//total lighted
+        {
+            resVisibility = 1.0f;
+        }
+        else// half shadow
+        {
+            float aveBlckZClip =  AveBlockerZ(shadowMap, ShadowCoord, 100, 0.001,dz_duv);
+            float aveBlckZCmra = ZClipToZCmra(aveBlckZClip);
+            float LightSize = 0.5;
+            float penumbra = LightSize * ((ShadowCoord.z) -  aveBlckZClip) / aveBlckZClip;
+            resVisibility = GetVisibility(shadowMap,ShadowCoord,bias,dz_duv, penumbra);
+        }
+        
+    }
+    return resVisibility;
+}
+
+
 void main(){
     
     // Light emission properties
     vec3 LightColor = vec3(1,1,1);
     //float LightPower = 1000000000.0f;
-    float LightPower = 60000.0f;
+    //float LightPower = 60000.0f;
+    float LightPower = 50.0f;
     
     // Material properties
     vec3 MaterialDiffuseColor = texture( DiffuseTextureSampler, UV ).rgb * 1.2;
@@ -90,7 +205,14 @@ void main(){
     //  - Looking elsewhere -> < 1
     float cosAlpha = clamp( dot( E,R ), 0, 1 );
     
+    //float visibility = PCSS( shadowMap, ShadowCoord,  cosTheta, Normal_lightspace);
+    
+    
+    // ****** Simple shadow-mapping *****
+    
     float visibility=1.0;
+    
+    if(mayCastShad(ShadowCoord)) {
     
     // Fixed bias, or...
     //float bias = 0.00005;
@@ -100,7 +222,7 @@ void main(){
     //bias = clamp(bias, 0,0.01);
     float bias = 0;
     
-    // Sample the shadow map 4 times
+    // Sample the shadow map 40 times
     for (int i = 0; i < 40; i++){
         // use either :
         //  - Always the same samples.
@@ -126,7 +248,7 @@ void main(){
     // For spot lights, use either one of these lines instead.
     // if ( texture( shadowMap, (ShadowCoord.xy/ShadowCoord.w) ).z  <  (ShadowCoord.z-bias)/ShadowCoord.w )
     // if ( textureProj( shadowMap, ShadowCoord.xyw ).z  <  (ShadowCoord.z-bias)/ShadowCoord.w )
-    
+    }
     
     color =
     // Ambient : simulates indirect lighting

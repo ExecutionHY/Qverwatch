@@ -23,6 +23,7 @@ GLuint DepthProgramID;
 GLuint DepthMVPMatrixID;
 GLuint DepthBiasID;
 GLuint ShadowMapID;
+GLuint DepthMVPID;
 
 GLuint programID;
 GLuint MVPMatrixID;
@@ -182,6 +183,7 @@ void initGL() {
     DepthBiasID = glGetUniformLocation(programID, "DepthBiasMVP");
     ShadowMapID = glGetUniformLocation(programID, "shadowMap");
     SurfaceID = glGetUniformLocation(programID, "Surface");
+    DepthMVPID = glGetUniformLocation(programID, "DepthMVP");
     
     
     // Get a handle for our "LightPosition" uniform --- for spot light

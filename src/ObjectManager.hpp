@@ -64,6 +64,7 @@ extern GLuint DepthProgramID;
 extern GLuint DepthMVPMatrixID;
 extern GLuint DepthBiasID;
 extern GLuint ShadowMapID;
+extern GLuint DepthMVPID;
 
 extern GLuint LightID;
 extern GLuint LightInvDirID;
