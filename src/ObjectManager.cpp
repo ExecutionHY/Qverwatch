@@ -200,6 +200,13 @@ void Object::drawObject() {
     // Draw the triangles !
     glDrawElements(GL_TRIANGLES, obj[this->ObjNum].getIndiceSize(), GL_UNSIGNED_SHORT, (void*)0);
     
+    glDisableVertexAttribArray(0);
+    glDisableVertexAttribArray(1);
+    glDisableVertexAttribArray(2);
+    glDisableVertexAttribArray(3);
+    glDisableVertexAttribArray(4);
+
+    
 }
 void Object::loadDepth() {
     // load its own MVP

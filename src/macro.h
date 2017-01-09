@@ -59,6 +59,7 @@ extern GLuint DepthTexture;
 extern GLuint DepthFrameBuffer;
 extern GLuint quad_vertexbuffer;
 
+extern GLuint UIID;
 extern GLuint VertexArrayID;
 extern GLuint QuadProgramID;
 extern GLuint QuadTextureID;
@@ -92,5 +93,13 @@ extern Object object[10000];
 extern int objIndex, objIndex1, rcdIndex;
 extern ALuint source;
 
+// particles
+extern GLuint ParticleProgramID;
+extern GLuint ParticleTextureID;
+extern GLuint CameraRight_worldspace_ID;
+extern GLuint CameraUp_worldspace_ID;
+extern GLuint ViewProjMatrixID;
+extern GLuint ParticleTexture;
+extern GLuint UITexture;
 
 #endif /* macro_h */

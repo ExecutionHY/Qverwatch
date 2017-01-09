@@ -4,9 +4,14 @@
 layout(location = 0) out vec4 color;
 
 uniform sampler2D quadTexture;
+uniform int UI;
 
 in vec2 UV;
 
 void main(){
-	color = texture(quadTexture, UV);
+    if (UI == 1) {
+        if (texture(quadTexture, UV).r < 0.01f && texture(quadTexture, UV).g < 0.01f && texture(quadTexture, UV).b < 0.01f) color = vec4(0.0f, 0.0f, 0.0f, 0.0f);
+        else color = texture(quadTexture, UV);
+    }
+    else color = texture(quadTexture, UV);
 }

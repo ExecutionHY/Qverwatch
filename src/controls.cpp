@@ -2,7 +2,7 @@
 #include "controls.hpp"
 
 //#include "ObjectManager.hpp"
-
+/*
 glm::mat4 View;
 glm::mat4 Projection;
 
@@ -14,10 +14,10 @@ glm::mat4 getProjectionMatrix(){
 }
 
 
-
 // Initial position : on +Z
 glm::vec3 position = glm::vec3( -12, 2, -85 );
 //glm::vec3 position = glm::vec3( 0, 2, 0 );
+//position = glm:vec3(9.761077, 12.921499, -77.334358);
 // Initial horizontal angle : toward -Z
 float horizontalAngle = 3.14f*1.25;
 // Initial vertical angle : none
@@ -124,8 +124,8 @@ void computeMatricesFromInputs(){
         object[i].checkPos(position, 1000);
     }
 }
+*/
 
-/*
 glm::mat4 View;
 glm::mat4 Projection;
 
@@ -137,7 +137,7 @@ glm::mat4 getProjectionMatrix() {
 }
 
 // Initial position : on +Z
-glm::vec3 position = glm::vec3( -12, 1.5, -85 );      // the man tall 2m
+glm::vec3 position = glm::vec3( -12, 2, -85 );      // the man tall 2m
 // Initial horizontal angle : toward -Zw
 float horizontalAngle = 3.14f;
 // Initial vertical angle : none
@@ -299,6 +299,10 @@ void computeMatricesFromInputs() {
             }
         }
     }
+    if (position.y < 1) {
+        position.y = 1;
+        jumpSpeed = 0;
+    }
     printf("%f %f\n", jumpSpeed, position.y);
     
     
@@ -350,4 +354,4 @@ bool PointinTriangle(vec3 A, vec3 B, vec3 C, vec3 P)
     return u + v <= 1;
 }
 
-*/
+

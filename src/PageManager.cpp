@@ -8,7 +8,7 @@
 
 #include "PageManager.hpp"
 
-GLFWwindow* window;
+GLFWwindow* window; // 1920 x 1080
 int windowWidth = 800;
 int windowHeight = 600;
 
@@ -16,6 +16,7 @@ GLuint DepthTexture;
 GLuint DepthFrameBuffer;
 GLuint quad_vertexbuffer;
 
+GLuint UIID;
 GLuint VertexArrayID;
 GLuint QuadProgramID;
 GLuint QuadTextureID;
@@ -44,6 +45,16 @@ GLuint HomePageTexture;
 GLuint DiffuseTexture[1000];
 GLuint NormalTexture[1000];
 GLuint SpecularTexture[1000];
+
+// particles
+GLuint ParticleProgramID;
+GLuint ParticleTextureID;
+// Vertex shader
+GLuint CameraRight_worldspace_ID;
+GLuint CameraUp_worldspace_ID;
+GLuint ViewProjMatrixID;
+GLuint ParticleTexture;
+GLuint UITexture;
 
 void initGL() {
     // Initialise GLFW
@@ -164,6 +175,8 @@ void initGL() {
     
     // Get a handle for uniform
     TextureID = glGetUniformLocation(QuadProgramID, "myTextureSampler");
+    UIID = glGetUniformLocation(QuadProgramID, "UI");
+    
     
     // Create and compile our GLSL program from the shaders
     //programID = LoadShaders( "ShadowMapping.vertexshader", "ShadowMapping.fragmentshader" );
@@ -191,6 +204,15 @@ void initGL() {
     // for directional light
     LightInvDirID = glGetUniformLocation(programID, "LightInvDirection_worldspace");
     
+    
+    ParticleProgramID = LoadShaders( "Particle.vertexshader", "Particle.fragmentshader" );
+    ParticleTextureID = glGetUniformLocation(ParticleProgramID, "myTextureSampler");
+    // Vertex shader
+    CameraRight_worldspace_ID  = glGetUniformLocation(programID, "CameraRight_worldspace");
+    CameraUp_worldspace_ID  = glGetUniformLocation(programID, "CameraUp_worldspace");
+    ViewProjMatrixID = glGetUniformLocation(programID, "VP");
+    
+    
     // ???? init the obj ???
     memset(DiffuseTexture, 0, sizeof(DiffuseTexture));
     memset(NormalTexture, 0, sizeof(NormalTexture));
@@ -208,6 +230,7 @@ void loadingPage() {
     
     // Use our shader
     glUseProgram(QuadProgramID);
+    glUniform1i(UIID, 0);
     
     // Bind our texture in Texture Unit 0
     glActiveTexture(GL_TEXTURE0);
@@ -254,6 +277,8 @@ void selectingPage() {
         
         // Use our shader
         glUseProgram(QuadProgramID);
+        glUniform1i(UIID, 0);
+
         
         // Bind our texture in Texture Unit 0
         glActiveTexture(GL_TEXTURE0);

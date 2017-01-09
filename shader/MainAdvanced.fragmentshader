@@ -170,8 +170,8 @@ void main(){
     // Light emission properties
     vec3 LightColor = vec3(1,1,1);
     //float LightPower = 1000000000.0f;
-    //float LightPower = 60000.0f;
-    float LightPower = 50.0f;
+    float LightPower = 60000.0f;
+    //float LightPower = 50.0f;
     
     // Material properties
     vec3 MaterialDiffuseColor = texture( DiffuseTextureSampler, UV ).rgb * 1.2;
