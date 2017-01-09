@@ -2,7 +2,10 @@
 #include "controls.hpp"
 
 //#include "ObjectManager.hpp"
+
+
 /*
+
 glm::mat4 View;
 glm::mat4 Projection;
 
@@ -15,11 +18,11 @@ glm::mat4 getProjectionMatrix(){
 
 
 // Initial position : on +Z
-glm::vec3 position = glm::vec3( -12, 2, -85 );
+//glm::vec3 position = glm::vec3( -12, 2, -85 );
 //glm::vec3 position = glm::vec3( 0, 2, 0 );
-//position = glm:vec3(9.761077, 12.921499, -77.334358);
+vec3 position = vec3(7, 10, -90);
 // Initial horizontal angle : toward -Z
-float horizontalAngle = 3.14f*1.25;
+float horizontalAngle = 3.14f*1.75;
 // Initial vertical angle : none
 float verticalAngle = 0.0f;
 // Initial Field of View
@@ -126,6 +129,8 @@ void computeMatricesFromInputs(){
 }
 */
 
+
+
 glm::mat4 View;
 glm::mat4 Projection;
 
@@ -136,10 +141,16 @@ glm::mat4 getProjectionMatrix() {
     return Projection;
 }
 
+
 // Initial position : on +Z
-glm::vec3 position = glm::vec3( -12, 2, -85 );      // the man tall 2m
+//glm::vec3 position = glm::vec3( -12, 2, -85 );      // the man tall 2m
 // Initial horizontal angle : toward -Zw
-float horizontalAngle = 3.14f;
+//float horizontalAngle = 3.14f;
+
+vec3 position = vec3(7, 10, -90);
+// Initial horizontal angle : toward -Z
+float horizontalAngle = 3.14f*1.75;
+
 // Initial vertical angle : none
 float verticalAngle = 0.0f;
 // Initial Field of View
@@ -279,25 +290,27 @@ void computeMatricesFromInputs() {
         vec3 v0 = obj[0].indexed_vertices[obj[0].indices[i + 0]];
         vec3 v1 = obj[0].indexed_vertices[obj[0].indices[i + 1]];
         vec3 v2 = obj[0].indexed_vertices[obj[0].indices[i + 2]];
+        vec3 v3 = vec3(0,0.7,0);
         
-        float distance = ((position - v0).x*obj[0].indexed_normals[obj[0].indices[i]].x +
-                          (position - v0).y*obj[0].indexed_normals[obj[0].indices[i]].y +
-                          (position - v0).z*obj[0].indexed_normals[obj[0].indices[i]].z);
+        float distance = ((position-v3 - v0).x*obj[0].indexed_normals[obj[0].indices[i]].x +
+                          (position-v3 - v0).y*obj[0].indexed_normals[obj[0].indices[i]].y +
+                          (position-v3 - v0).z*obj[0].indexed_normals[obj[0].indices[i]].z);
         //printf("%d %f ",i, distance);
-        if (fabs(distance) < 1.5f) {
+        if (fabs(distance) < 0.5f) {
             vec3 add;
             //vec3 ptr = position - add * distance;
             if (distance > 0) add = obj[0].indexed_normals[obj[0].indices[i]];
             else add = -obj[0].indexed_normals[obj[0].indices[i]];
-            vec3 ptr = position - add * distance;
+            vec3 ptr = position-v3 - add * distance;
             if (PointinTriangle(v0, v1, v2, ptr)) {
-                position += add * (1.5f - fabs(distance)); //printf("%d %f ", i, distance);
+                position += add * (0.5f - fabs(distance)); //printf("%d %f ", i, distance);
                 if ((obj[0].indexed_normals[obj[0].indices[i]].y/sqrt(obj[0].indexed_normals[obj[0].indices[i]].x*obj[0].indexed_normals[obj[0].indices[i]].x+ obj[0].indexed_normals[obj[0].indices[i]].y*obj[0].indexed_normals[obj[0].indices[i]].y+ obj[0].indexed_normals[obj[0].indices[i]].z* obj[0].indexed_normals[obj[0].indices[i]].z)) > 0.5 && jumpSpeed < 0) {
                     jumpSpeed = 0; JUMP = 0;
                 }
                 //flag = 0;
             }
         }
+        
     }
     if (position.y < 1) {
         position.y = 1;
@@ -353,5 +366,6 @@ bool PointinTriangle(vec3 A, vec3 B, vec3 C, vec3 P)
     
     return u + v <= 1;
 }
+
 
 

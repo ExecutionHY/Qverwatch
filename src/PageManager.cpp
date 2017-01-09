@@ -106,14 +106,10 @@ void initGL() {
     // Dark blue background
     glClearColor(0.0f, 0.0f, 0.1f, 0.0f);
     
-    
-    
-    // Cull triangles which normal is not towards the camera
-    glEnable(GL_CULL_FACE);
-    
     glGenVertexArrays(1, &VertexArrayID);
     glBindVertexArray(VertexArrayID);
     
+    glEnable(GL_CULL_FACE);
     
     // ***************** For shadow *****************
     
@@ -208,9 +204,9 @@ void initGL() {
     ParticleProgramID = LoadShaders( "Particle.vertexshader", "Particle.fragmentshader" );
     ParticleTextureID = glGetUniformLocation(ParticleProgramID, "myTextureSampler");
     // Vertex shader
-    CameraRight_worldspace_ID  = glGetUniformLocation(programID, "CameraRight_worldspace");
-    CameraUp_worldspace_ID  = glGetUniformLocation(programID, "CameraUp_worldspace");
-    ViewProjMatrixID = glGetUniformLocation(programID, "VP");
+    CameraRight_worldspace_ID  = glGetUniformLocation(ParticleProgramID, "CameraRight_worldspace");
+    CameraUp_worldspace_ID  = glGetUniformLocation(ParticleProgramID, "CameraUp_worldspace");
+    ViewProjMatrixID = glGetUniformLocation(ParticleProgramID, "VP");
     
     
     // ???? init the obj ???

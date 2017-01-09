@@ -171,7 +171,7 @@ int main( void )
     //test.loadDepth();
     
     
-    for (int i = 0; i < objIndex; i++) {
+    for (int i = 1; i < objIndex; i++) {
         object[i].loadDepth();
     }
     for (int i = objIndex; i < rcdIndex; i++) {
@@ -256,7 +256,7 @@ int main( void )
         //test.drawObject();
         
         
-        for (int i = 0; i < objIndex; i++) {
+        for (int i = 1; i < objIndex; i++) {
             if (object[i].isValid()) object[i].drawObject();
         }
         for (int i = objIndex; i < rcdIndex; i++) {
