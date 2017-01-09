@@ -24,7 +24,7 @@
 #include "shader.hpp"
 #include "text2D.hpp"
 
-#define DEPTH_TEXTURE_SIZE 1024
+#define DEPTH_TEXTURE_SIZE 15000
 #define FRUSTUM_DEPTH 1.0f
 
 extern GLFWwindow* window; // The "extern" keyword here is to access the variable "window" declared in tutorialXXX.cpp. This is a hack to keep the tutorials simple. Please avoid this.

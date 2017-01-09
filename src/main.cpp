@@ -47,10 +47,10 @@ int main( void )
     SpecularTexture[0] = loadDDS("res/specular.DDS");
  
     //loadMap("res/Decode/HANAMURA.owmapx");
-    //loadMap("res/Decode/simple.owmapx");
-    loadMap("res/car.owmapx");
-    obj[9999].initOBJ("res/test.obj");
-    Object test = Object("test", 9999, 0, 0);
+    //loadMap("res/car.owmapx");
+    loadMap("res/Decode/simple.owmapx");
+    //obj[0].initOBJ("res/phy.obj");
+    //Object test = Object("test", 0, 0, 0);
     //test.setModel(scale(mat4x4(1.0), vec3(10,10,10)));
     
     //initAL("res/Hanamura.wav");
@@ -59,6 +59,58 @@ int main( void )
     
     //alSourcePlay(source);
     
+    // Enable depth test
+    glEnable(GL_DEPTH_TEST);
+    // Accept fragment if it closer to the camera than the former one
+    glDepthFunc(GL_LESS);
+    
+    
+    // Render to our framebuffer
+    glBindFramebuffer(GL_FRAMEBUFFER, DepthFrameBuffer);
+    glViewport(0, 0, DEPTH_TEXTURE_SIZE, DEPTH_TEXTURE_SIZE);
+    
+    // not using bias but draw back faces !!!
+    glCullFace(GL_FRONT);
+    
+    // Clear the screen
+    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+    
+    // Use our shader
+    glUseProgram(DepthProgramID);
+    /*
+     //vec3 lightInvDir = vec3(10, 10, 10);
+     vec3 lightPos = vec3(-11, 11, -84);
+     vec3 lightInvDir = vec3(-15.929764, 18.679287, -88.606285) - vec3(-7.360991, 3.405631, -81.104904);
+     */
+    
+    //vec3 lightPos = vec3( -12, 15, -85 );
+    //vec3 nearLightPos = vec3( -55.915115, 10.807584, -36.536823 );
+    //vec3 basePos = vec3( -8.680655, 0.710400, -88.737778 );
+    vec3 nearLightPos = vec3(13.802021, 13.373522, -87.761742);
+    vec3 basePos = vec3(-13.333028, 3.317286, -84.592285);
+    vec3 lightInvDir = nearLightPos - basePos;
+    vec3 lightPos = basePos + lightInvDir * 1000.0f;
+    lightPos = basePos + lightInvDir * 10.0f;
+    
+    
+    DepthProjectionMatrix = perspective(90.0f, 1.0f/1.0f, 20.0f, 100.0f);
+    DepthViewMatrix = lookAt(nearLightPos, basePos, vec3(0, 1, 0));
+    
+    // Compute the MVP from the light's point of view
+    //DepthProjectionMatrix = ortho<float>(-16, 16, -16, 16, 10, 50);
+    //DepthViewMatrix = lookAt(lightInvDir, vec3(0, 0, 0), vec3(0, 1, 0));
+    
+    //test.loadDepth();
+    
+    
+    for (int i = 0; i < objIndex; i++) {
+        object[i].loadDepth();
+    }
+    for (int i = objIndex; i < rcdIndex; i++) {
+        object[i].loadDepth();
+    }
+    
+    
     do{
         
         // Enable depth test
@@ -66,46 +118,8 @@ int main( void )
         // Accept fragment if it closer to the camera than the former one
         glDepthFunc(GL_LESS);
         
-        
-        // Render to our framebuffer
-        glBindFramebuffer(GL_FRAMEBUFFER, DepthFrameBuffer);
-        glViewport(0, 0, DEPTH_TEXTURE_SIZE, DEPTH_TEXTURE_SIZE);
-        
         // not using bias but draw back faces ..?
         glCullFace(GL_BACK);
-        
-        // Clear the screen
-        glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-        
-        // Use our shader
-        glUseProgram(DepthProgramID);
-        /*
-        //vec3 lightInvDir = vec3(10, 10, 10);
-        vec3 lightPos = vec3(-11, 11, -84);
-        vec3 lightInvDir = vec3(-15.929764, 18.679287, -88.606285) - vec3(-7.360991, 3.405631, -81.104904);
-        */
-        
-        //vec3 lightPos = vec3( -12, 8, -85 );
-        vec3 lightPos = vec3( 10, 10, 10 );
-        vec3 lightInvDir = lightPos;
-        
-        //DepthProjectionMatrix = perspective(45.0f, 1.0f/1.0f, 0.1f, 1000.0f);
-        //DepthViewMatrix = lookAt(lightInvDir, vec3(-12, 0, -85), vec3(0, 1, 0));
-        
-        
-        // Compute the MVP from the light's point of view
-        DepthProjectionMatrix = ortho<float>(-100, 100, -100, 100, -100, 200);
-        DepthViewMatrix = lookAt(lightInvDir, vec3(0, 0, 0), vec3(0, 1, 0));
-        
-        test.loadDepth();
-        
-        
-        for (int i = 0; i < objIndex; i++) {
-            object[i].loadDepth();
-        }
-        for (int i = objIndex; i < rcdIndex; i++) {
-            object[i].loadDepth();
-        }
         
         // *************************** Draw Objects ****************************
         
@@ -126,9 +140,9 @@ int main( void )
         
         glUniform3f(LightInvDirID, lightInvDir.x, lightInvDir.y, lightInvDir.z);
         // spot light
-        //glUniform3f(LightID, lightPos.x, lightPos.y, lightPos.z);
+        glUniform3f(LightID, lightPos.x, lightPos.y, lightPos.z);
         
-        test.drawObject();
+        //test.drawObject();
         
         
         for (int i = 0; i < objIndex; i++) {

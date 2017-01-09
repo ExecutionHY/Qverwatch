@@ -7,10 +7,14 @@
 //
 #include "macro.h"
 #include "MapLoader.hpp"
+#include <string>
 
-int objIndex = 0, objIndex1 = 0, rcdIndex = 0;
+int objIndex = 1, objIndex1 = 1, rcdIndex = 1;
 vector<int> diffuseT;
 vector<int> normalT;
+int diffuseTextureCount = 1, normalTextureCount = 1;
+string diffuseTextureList[1000];
+string normalTextureList[1000];
 
 using namespace glm;
 bool loadMap(char * filename) {
@@ -43,7 +47,7 @@ bool loadMap(char * filename) {
         fscanf(mapfile, "[%f, %f, %f]\n", &scl.x, &scl.y, &scl.z);
         fscanf(mapfile, "[%f, %f, %f, %f]\n", &rot.x, &rot.y, &rot.z, &rot.w);
         
-        if (distance(pos, position) > 50.0f) continue;
+        //if (distance(pos, position) > 50.0f) continue;
         
         float agl = acosf(rot.w)*2;
         rtt.x = rot.x / sin(agl/2);
@@ -88,7 +92,7 @@ bool loadMap(char * filename) {
                  fscanf(mapfile, "[%f, %f, %f]\n", &scl.x, &scl.y, &scl.z);
                  fscanf(mapfile, "[%f, %f, %f, %f]\n", &rot.x, &rot.y, &rot.z, &rot.w);
                  
-                 if (distance(pos, position) > 50.0f) continue;
+                 //if (distance(pos, position) > 50.0f) continue;
                  
                  float agl = acosf(rot.w)*2;
                  rtt.x = rot.x / sin(agl/2);
@@ -104,7 +108,7 @@ bool loadMap(char * filename) {
                  loadMat(MatName, mtlIndex);
                  if (shouldDelete(MatName, rcdcnt)) model = mat4x4(0);
                  for (int i = 0; i < meshCount; i++) {
-                     object[i+rcdIndex] = Object(MdlName, i+objIndex1, diffuseT[i], normalT[i]);
+                     object[i+rcdIndex] = Object(MdlName, i+objIndex1, diffuseT[i], 0);
                      object[i+rcdIndex].setModel(model);
                      object[i+rcdIndex].setPos(pos);
                      object[i+rcdIndex].setRange(max(max(scl.x, scl.y), scl.z));
@@ -224,6 +228,7 @@ int loadMdl( const char * path, int objIndex ) {
 int loadMat(const char* path, int mtlIndex) {
     char fullpath[256] = "";
     sprintf(fullpath,"%s%sx","res/Decode/",path);
+    printf("Loading MAT file %s...\n", fullpath);
     FILE * file = fopen(fullpath, "r");
     if( file == NULL ){
         printf("Impossible to open the file %s!\n", path);
@@ -249,12 +254,22 @@ int loadMat(const char* path, int mtlIndex) {
             bmpPath[length-2] = 'm';
             bmpPath[length-1] = 'p';
             if (textureType == 0 && diffuseIndex == 0) {
-                DiffuseTexture[mtlIndex+mtl] = loadBMP_custom(bmpPath);
-                diffuseIndex = mtlIndex+mtl;
+                diffuseIndex = findDiffuseTexture(bmpPath);
+                if (diffuseIndex == 0) {
+                    DiffuseTexture[diffuseTextureCount] = loadBMP_custom(bmpPath);
+                    diffuseIndex = diffuseTextureCount;
+                    diffuseTextureList[diffuseTextureCount] = string(bmpPath);
+                    diffuseTextureCount++;
+                }
             }
             else if (textureType == 1 && normalIndex == 0) {
-                NormalTexture[mtlIndex+mtl] = loadBMP_custom(bmpPath);
-                normalIndex = mtlIndex+mtl;
+                normalIndex = findNormalTexture(bmpPath);
+                if (normalIndex == 0) {
+                    NormalTexture[normalTextureCount] = loadBMP_custom(bmpPath);
+                    normalIndex = normalTextureCount;
+                    normalTextureList[normalTextureCount] = string(bmpPath);
+                    normalTextureCount++;
+                }
             }
         }
         diffuseT.push_back(diffuseIndex);
@@ -266,4 +281,19 @@ int loadMat(const char* path, int mtlIndex) {
 bool shouldDelete(const char* entity, const int rcd) {
     if (strcmp(entity, "00000000078C_0000000010D2.owmat") == 0) return true;
     return false;
+}
+
+int findDiffuseTexture(const char* path) {
+    for (int i = 1; i < diffuseTextureCount; i++) {
+        if (strcmp(path, diffuseTextureList[i].c_str()) == 0)
+            return i;
+    }
+    return 0;
+}
+int findNormalTexture(const char* path) {
+    for (int i = 1; i < normalTextureCount; i++) {
+        if (strcmp(path, normalTextureList[i].c_str()) == 0)
+            return i;
+    }
+    return 0;
 }

@@ -18,4 +18,6 @@ bool loadMap(char * filename);
 int loadMdl(const char* path, int objIndex);
 int loadMat(const char* path, int mtlIndex);
 bool shouldDelete(const char* entity, const int rcd);
+int findDiffuseTexture(const char* path);
+int findNormalTexture(const char* path);
 #endif /* MapLoader_hpp */
